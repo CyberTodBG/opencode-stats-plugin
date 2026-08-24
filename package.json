@@ -1,0 +1,11 @@
+{
+  "name": "opencode-stats-plugin",
+  "version": "1.0.0",
+  "private": true,
+  "description": "OpenCode TUI plugin adding a /stats command with token usage and generation speed.",
+  "dependencies": {
+    "@opencode-ai/plugin": "1.18.16",
+    "@opentui/solid": "0.4.5",
+    "solid-js": "^1.9.12"
+  }
+}
