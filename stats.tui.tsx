@@ -51,7 +51,13 @@ function getActiveSessionID(api: TuiPluginApi): string | undefined {
   return api.route.current.params?.sessionID as string | undefined
 }
 
-function formatReport(totals: Usage, tokPerSec: number, avgTokPerSec: number): string {
+interface Report {
+  body: string
+  speed: string
+  note: string
+}
+
+function formatReport(totals: Usage, tokPerSec: number, avgTokPerSec: number): Report {
   const rows = [
     ["Input (prompt)", fmt(totals.input)],
     ["Output (completion)", fmt(totals.output)],
@@ -69,25 +75,32 @@ function formatReport(totals: Usage, tokPerSec: number, avgTokPerSec: number): s
       : "Generation speed: not measured yet this session"
   const note =
     "Data sourced from OpenCode's internal token reporting; accuracy depends on the provider's usage metadata."
-  return ["Session Stats", "", body, "", speed, "", note].join("\n")
+  return { body, speed, note }
 }
 
-function StatsDialog(props: { api: TuiPluginApi; output: string }) {
-  const lines = () => props.output.split("\n")
+function StatsDialog(props: { api: TuiPluginApi; report: Report }) {
+  const bodyLines = () => props.report.body.split("\n")
   return (
-    <box gap={1} width="100%" flexGrow={1} paddingLeft={2} paddingRight={2} paddingBottom={1}>
+    <box gap={1} width="100%" maxWidth={70} flexGrow={1} paddingLeft={2} paddingRight={2} paddingBottom={1}>
       <text fg={props.api.theme.current.text}>
         <b>Session Stats</b>
       </text>
-      <scrollbox width="100%" flexGrow={1} minHeight={6} maxHeight={28}>
+      <scrollbox width="100%" flexGrow={0} minHeight={6} maxHeight={13}>
         <box gap={0} width="100%" minWidth={0}>
-          {lines().map((line) => (
+          {bodyLines().map((line) => (
             <text fg={props.api.theme.current.text} wrapMode="word" width="100%">
               {line || " "}
             </text>
           ))}
+          <text fg={props.api.theme.current.text}> </text>
+          <text fg={props.api.theme.current.text} wrapMode="word" width="100%">
+            {props.report.speed}
+          </text>
         </box>
       </scrollbox>
+      <text fg={props.api.theme.current.textMuted} wrapMode="word" width="100%">
+        {props.report.note}
+      </text>
       <text fg={props.api.theme.current.textMuted}>esc closes</text>
     </box>
   )
@@ -186,9 +199,9 @@ const tui: TuiPlugin = async (api) => {
           const totals =
             fromClient.input + fromClient.output + fromClient.reasoning > 0 ? fromClient : fromEvents
           api.ui.dialog.replace(() => (
-            <StatsDialog api={api} output={formatReport(totals, tokPerSec(), avgTokPerSec())} />
+            <StatsDialog api={api} report={formatReport(totals, tokPerSec(), avgTokPerSec())} />
           ))
-          api.ui.dialog.setSize("large")
+          api.ui.dialog.setSize("medium")
         },
       },
     ],
