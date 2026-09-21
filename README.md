@@ -1,5 +1,9 @@
 # opencode-stats-plugin
 
+**The plugin is for v1 only. Opencode2 added a buit-in `/stats` command which shows
+total usage to date. I have updated my local version to support v2 and changed the
+registered command. It should be dual-version, but I can't test v1 anymore**
+
 A small OpenCode **TUI plugin** that adds a `/stats` command showing per-session
 token usage (input, output, reasoning, cache read/write) and live generation
 speed in **tok/s**.
